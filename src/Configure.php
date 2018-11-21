@@ -132,13 +132,15 @@ class Configure
         $parsed = parse_url($dsn);
 
         switch ($parsed['scheme'] ?? 'default') {
-            case 'tcp' && $this->cmg:
-                return $this->cmg->hosting(
-                    new Address($parsed['host'], $parsed['port'] ?? 80),
-                    static function (Address $address) {
-                        return new TCP($address);
-                    }
-                );
+            case 'tcp':
+                if ($this->cmg) {
+                    return $this->cmg->hosting(
+                        new Address($parsed['host'], $parsed['port'] ?? 80),
+                        static function (Address $address) {
+                            return new TCP($address);
+                        }
+                    );
+                }
         }
 
         return new Stdout;
@@ -151,11 +153,14 @@ class Configure
     private function getReplicator(string $dsn = null) : ?Replicated
     {
         $parsed = parse_url($dsn);
+
         switch ($parsed['scheme'] ?? 'default') {
-            case 'logio' && $this->cmg:
-                return new LogIO($this->env, $this->cmg, new Address($parsed['host'], $parsed['port'] ?? 28777));
-            default:
-                return null;
+            case 'logio':
+                if ($this->cmg) {
+                    return new LogIO($this->env, $this->cmg, new Address($parsed['host'], $parsed['port'] ?? 28777));
+                }
         }
+
+        return null;
     }
 }
