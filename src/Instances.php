@@ -35,7 +35,7 @@ class Instances
     /**
      * @param Configure $configure
      */
-    public static function configuration(Configure $configure) : void
+    public static function reload(Configure $configure) : void
     {
         if (self::$configured) {
             self::$configured->unload();
