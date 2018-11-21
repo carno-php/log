@@ -10,6 +10,7 @@ namespace Carno\Log\Outputter;
 
 use Carno\Log\Contracts\Closeable;
 use Carno\Log\Contracts\Outputter;
+use Carno\Log\Exception\MissingNWSocketException;
 use Carno\Net\Address;
 use Carno\Net\Contracts\TCP as Pipe;
 use Carno\Net\Events;
@@ -71,6 +72,11 @@ class TCP implements Outputter, Closeable
      */
     public function __construct(Address $endpoint)
     {
+        if (!class_exists(Socket::class)) {
+            trigger_error('NWSocket not loaded, tcp outputter will not working', E_USER_WARNING);
+            throw new MissingNWSocketException;
+        }
+
         $this->endpoint = $endpoint;
 
         $this->events = (new Events)

@@ -63,20 +63,27 @@ class Logger extends AbstractLogger
     public function __construct(string $scene, Configure $configure)
     {
         $this->scene = $scene;
+        $this->reconfigure($configure);
+    }
 
-        $configure->syncLevel($scene, function (string $level) {
+    /**
+     * @param Configure $configure
+     */
+    public function reconfigure(Configure $configure) : void
+    {
+        $configure->syncLevel($this->scene, function (string $level) {
             $this->allows = array_slice($this->levels, 0, array_search($level, $this->levels, true) + 1);
         });
 
-        $configure->syncFormatter($scene, function (Formatter $formatter) {
+        $configure->syncFormatter($this->scene, function (Formatter $formatter) {
             $this->formatter = $formatter;
         });
 
-        $configure->syncOutputter($scene, function (Outputter $outputter) {
+        $configure->syncOutputter($this->scene, function (Outputter $outputter) {
             $this->outputter = $outputter;
         });
 
-        $configure->syncReplicator($scene, function (Replicated $replicated = null) {
+        $configure->syncReplicator($this->scene, function (Replicated $replicated = null) {
             $this->replicator = $replicated;
         });
     }

@@ -21,7 +21,7 @@ class Instances
     /**
      * @var Configure
      */
-    private static $configure = null;
+    private static $configured = null;
 
     /**
      * @param string $scene
@@ -29,17 +29,33 @@ class Instances
      */
     public static function get(string $scene) : LoggerInterface
     {
-        return
-            self::$loggers[$scene] ??
-            self::$loggers[$scene] =
-                new Logger(
-                    $scene,
-                    self::$configure ??
-                    self::$configure = new Configure(
-                        DI::has(Environment::class) ? DI::get(Environment::class) : new Environment,
-                        DI::has(Connections::class) ? DI::get(Connections::class) : null
-                    )
-                )
-        ;
+        return self::$loggers[$scene] ?? self::$loggers[$scene] = new Logger($scene, self::configure());
+    }
+
+    /**
+     * @param Configure $configure
+     */
+    public static function configuration(Configure $configure) : void
+    {
+        if (self::$configured) {
+            self::$configured->unload();
+        }
+
+        self::$configured = $configure;
+
+        foreach (self::$loggers as $logger) {
+            $logger->reconfigure($configure);
+        }
+    }
+
+    /**
+     * @return Configure
+     */
+    private static function configure() : Configure
+    {
+        return self::$configured ?? self::$configured = new Configure(
+            DI::has(Environment::class) ? DI::get(Environment::class) : new Environment,
+            DI::has(Connections::class) ? DI::get(Connections::class) : null
+        );
     }
 }

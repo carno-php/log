@@ -8,6 +8,7 @@
 
 namespace Carno\Log;
 
+use Carno\Config\Features\Overrider;
 use Carno\Log\Contracts\Formatter;
 use Carno\Log\Contracts\Outputter;
 use Carno\Log\Contracts\Replicated;
@@ -34,6 +35,11 @@ class Configure
     private $cmg = null;
 
     /**
+     * @var Overrider[]
+     */
+    private $watched = [];
+
+    /**
      * Configure constructor.
      * @param Environment $env
      * @param Connections $cmg
@@ -52,7 +58,7 @@ class Configure
     {
         $sync(debug() ? LogLevel::DEBUG : LogLevel::INFO);
 
-        config()->overrides(static function (string $level) use ($sync) {
+        $this->watched[] = config()->overrides(static function (string $level) use ($sync) {
             debug() || $sync($level);
         }, 'log.level', $scene.'.log.level');
     }
@@ -65,7 +71,7 @@ class Configure
     {
         $sync($this->getFormatter('text'));
 
-        config()->overrides(function (string $type) use ($sync) {
+        $this->watched[] = config()->overrides(function (string $type) use ($sync) {
             debug() || $sync($this->getFormatter($type));
         }, 'log.format', $scene.'.log.format');
     }
@@ -78,7 +84,7 @@ class Configure
     {
         $sync($this->getOutputter('stdout://'));
 
-        config()->overrides(function (string $dsn) use ($sync) {
+        $this->watched[] = config()->overrides(function (string $dsn) use ($sync) {
             debug() || $sync($this->getOutputter($dsn));
         }, 'log.addr', $scene.'.log.addr');
     }
@@ -89,9 +95,18 @@ class Configure
      */
     public function syncReplicator(string $scene, Closure $sync) : void
     {
-        config()->overrides(function (string $dsn = null) use ($sync) {
+        $this->watched[] = config()->overrides(function (string $dsn = null) use ($sync) {
             debug() || $sync($this->getReplicator($dsn));
         }, 'log.replica', $scene.'.log.replica');
+    }
+
+    /**
+     */
+    public function unload() : void
+    {
+        foreach ($this->watched as $watcher) {
+            $watcher->unwatch();
+        }
     }
 
     /**
