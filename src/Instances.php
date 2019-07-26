@@ -8,6 +8,7 @@
 
 namespace Carno\Log;
 
+use function Carno\Config\conf;
 use Carno\Container\DI;
 use Psr\Log\LoggerInterface;
 
@@ -54,7 +55,8 @@ class Instances
     private static function configure() : Configure
     {
         return self::$configured ?? self::$configured = new Configure(
-            DI::has(Environment::class) ? DI::get(Environment::class) : new Environment,
+            conf(),
+            DI::has(Environment::class) ? DI::get(Environment::class) : new Environment(),
             DI::has(Connections::class) ? DI::get(Connections::class) : null
         );
     }

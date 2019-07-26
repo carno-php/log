@@ -8,6 +8,7 @@
 
 namespace Carno\Log;
 
+use Carno\Config\Config;
 use Carno\Config\Features\Overrider;
 use Carno\Log\Contracts\Formatter;
 use Carno\Log\Contracts\Outputter;
@@ -24,12 +25,16 @@ use Closure;
 class Configure
 {
     /**
+     * @var Config
+     */
+    private $cfg = null;
+
+    /**
      * @var Environment
      */
     private $env = null;
 
     /**
-     * global connections manager
      * @var Connections
      */
     private $cmg = null;
@@ -41,11 +46,13 @@ class Configure
 
     /**
      * Configure constructor.
+     * @param Config $cfg
      * @param Environment $env
      * @param Connections $cmg
      */
-    public function __construct(Environment $env, Connections $cmg = null)
+    public function __construct(Config $cfg, Environment $env, Connections $cmg = null)
     {
+        $this->cfg = $cfg;
         $this->env = $env;
         $this->cmg = $cmg;
     }
@@ -58,9 +65,9 @@ class Configure
     {
         $sync(debug() ? LogLevel::DEBUG : LogLevel::INFO);
 
-        $this->watched[] = config()->overrides(static function (string $level) use ($sync) {
+        $this->watched[] = $this->cfg->overrides(static function (string $level) use ($sync) {
             debug() || $sync($level);
-        }, 'log.level', $scene.'.log.level');
+        }, 'log.level', $scene . '.log.level');
     }
 
     /**
@@ -71,9 +78,9 @@ class Configure
     {
         $sync($this->getFormatter('text'));
 
-        $this->watched[] = config()->overrides(function (string $type) use ($sync) {
+        $this->watched[] = $this->cfg->overrides(function (string $type) use ($sync) {
             debug() || $sync($this->getFormatter($type));
-        }, 'log.format', $scene.'.log.format');
+        }, 'log.format', $scene . '.log.format');
     }
 
     /**
@@ -84,9 +91,9 @@ class Configure
     {
         $sync($this->getOutputter('stdout://'));
 
-        $this->watched[] = config()->overrides(function (string $dsn) use ($sync) {
+        $this->watched[] = $this->cfg->overrides(function (string $dsn) use ($sync) {
             debug() || $sync($this->getOutputter($dsn));
-        }, 'log.addr', $scene.'.log.addr');
+        }, 'log.addr', $scene . '.log.addr');
     }
 
     /**
@@ -95,9 +102,9 @@ class Configure
      */
     public function syncReplicator(string $scene, Closure $sync) : void
     {
-        $this->watched[] = config()->overrides(function (string $dsn = null) use ($sync) {
+        $this->watched[] = $this->cfg->overrides(function (string $dsn = null) use ($sync) {
             debug() || $sync($this->getReplicator($dsn));
-        }, 'log.replica', $scene.'.log.replica');
+        }, 'log.replica', $scene . '.log.replica');
     }
 
     /**
@@ -119,7 +126,7 @@ class Configure
             case 'json':
                 return new JSON($this->env);
             default:
-                return new Text;
+                return new Text();
         }
     }
 
@@ -143,7 +150,7 @@ class Configure
                 }
         }
 
-        return new Stdout;
+        return new Stdout();
     }
 
     /**
