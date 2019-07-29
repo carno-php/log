@@ -17,7 +17,7 @@
     "carno-php/socket": "Supports output to TCP/UDP"
   },
   "replace": {
-    "carno-php/log-slim": "self.version"
+    "carno-php/log-slim": "^1.0|~2.0"
   },
   "autoload": {
     "psr-4": {
