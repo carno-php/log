@@ -74,12 +74,12 @@ class TCP implements Outputter, Closeable
     {
         if (!class_exists(Socket::class)) {
             trigger_error('NWSocket not loaded, tcp outputter will not working', E_USER_WARNING);
-            throw new MissingNWSocketException;
+            throw new MissingNWSocketException();
         }
 
         $this->endpoint = $endpoint;
 
-        $this->events = (new Events)
+        $this->events = (new Events())
             ->attach(Events\Socket::CONNECTED, function () {
                 $this->connected();
             })

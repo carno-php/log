@@ -76,7 +76,7 @@ class LogIO implements Replicated
     {
         $buf = '';
 
-        $node = $this->env->app().(($t = $this->env->tagged()) ? sprintf(':%s', $t) : '');
+        $node = $this->env->app() . (($t = $this->env->tagged()) ? sprintf(':%s', $t) : '');
         $stream = $scene;
 
         if (!isset($this->assets[$node][$stream])) {

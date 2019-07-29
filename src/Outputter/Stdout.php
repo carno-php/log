@@ -17,6 +17,6 @@ class Stdout implements Outputter
      */
     public function write(string $data) : void
     {
-        echo $data;
+        PHP_SAPI === 'cli' && print $data;
     }
 }

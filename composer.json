@@ -25,6 +25,11 @@
     },
     "files": ["utils.php"]
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Carno\\Log\\Tests\\": "tests"
+    }
+  },
   "minimum-stability": "dev",
   "extra": {
     "branch-alias": {
